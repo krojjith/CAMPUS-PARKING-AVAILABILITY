@@ -1,0 +1,7 @@
+{
+  "name": "Campus Parking Availability System",
+  "description": "Real-time parking spot and zone occupancy tracking system with entrance display board, sensor simulator, and predictive analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
