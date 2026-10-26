@@ -34,6 +34,7 @@ import {
   Bell,
   X,
   FileCode,
+  GraduationCap,
 } from 'lucide-react';
 
 export default function App() {
@@ -67,6 +68,12 @@ export default function App() {
   const [alertsDefaultZone, setAlertsDefaultZone] = useState<string>('zone-b');
   /** Technical Documentation & Review 2 Spec modal */
   const [isDocsModalOpen, setIsDocsModalOpen] = useState<boolean>(false);
+  const [docsModalTab, setDocsModalTab] = useState<'report' | 'api' | 'schema' | 'testing' | 'boundaries' | 'hardware'>('report');
+
+  const handleOpenDocs = (tab: 'report' | 'api' | 'schema' | 'testing' | 'boundaries' | 'hardware' = 'report') => {
+    setDocsModalTab(tab);
+    setIsDocsModalOpen(true);
+  };
 
   const handleOpenAlertsForZone = (zoneId: string) => {
     setAlertsDefaultZone(zoneId);
@@ -121,7 +128,7 @@ export default function App() {
             activeAlertsCount={userAlerts.length}
             onOpenAlerts={() => setIsAlertsModalOpen(true)}
             onToggleSimulator={toggleSimulator}
-            onOpenDocs={() => setIsDocsModalOpen(true)}
+            onOpenDocs={handleOpenDocs}
           />
         )}
 
@@ -189,11 +196,18 @@ export default function App() {
               </div>
               <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
                 <button
-                  onClick={() => setIsDocsModalOpen(true)}
+                  onClick={() => handleOpenDocs('report')}
+                  className="hover:text-emerald-700 font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1 transition-colors"
+                >
+                  <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Student Phase Report &amp; Repo</span>
+                </button>
+                <button
+                  onClick={() => handleOpenDocs('api')}
                   className="hover:text-slate-900 underline flex items-center gap-1"
                 >
-                  <FileCode className="w-3 h-3 text-emerald-600" />
-                  <span>Review 2 Technical Docs</span>
+                  <FileCode className="w-3 h-3 text-slate-600" />
+                  <span>Tech Docs</span>
                 </button>
                 <span>&bull;</span>
                 <span>POST /api/update</span>
@@ -227,6 +241,7 @@ export default function App() {
         <TechDocsModal
           isOpen={isDocsModalOpen}
           onClose={() => setIsDocsModalOpen(false)}
+          initialTab={docsModalTab}
         />
       </div>
     </ErrorBoundary>

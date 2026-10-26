@@ -21,19 +21,36 @@ import {
   Layers,
   ArrowRight,
   Sparkles,
+  GraduationCap,
+  Download,
+  ExternalLink,
+  FileText,
+  CheckCheck,
+  GitBranch,
 } from 'lucide-react';
 import { BugSimulatorButton, ErrorBoundary } from './ErrorBoundary';
 
 interface TechDocsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'report' | 'api' | 'schema' | 'testing' | 'boundaries' | 'hardware';
 }
 
-export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'api' | 'schema' | 'testing' | 'boundaries' | 'hardware'>('api');
+export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose, initialTab = 'report' }) => {
+  const [activeTab, setActiveTab] = useState<'report' | 'api' | 'schema' | 'testing' | 'boundaries' | 'hardware'>(initialTab);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [apiTestResponse, setApiTestResponse] = useState<string | null>(null);
   const [isTestingApi, setIsTestingApi] = useState(false);
+
+  // Student Phase Report Form State
+  const [studentName, setStudentName] = useState<string>('Rojjith K');
+  const [studentId, setStudentId] = useState<string>('STU-2026-IOT-8812');
+  const [studentEmail, setStudentEmail] = useState<string>('krojjith@gmail.com');
+  const [courseName, setCourseName] = useState<string>('CS 492 / Capstone: Real-Time IoT Systems');
+  const [repoUrl, setRepoUrl] = useState<string>('https://github.com/krojjith/realtime-parking-availability-system');
+  const [reviewStage, setReviewStage] = useState<string>('Phase 2 / Review 2 (70% Completion)');
+  const [reportViewMode, setReportViewMode] = useState<'formatted' | 'raw'>('formatted');
+  const [copiedReportSuccess, setCopiedReportSuccess] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -41,6 +58,162 @@ export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose })
     navigator.clipboard?.writeText(text);
     setCopiedIndex(idx);
     setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const generateMarkdownReport = () => {
+    return `# STUDENT PHASE REPORT: REAL-TIME CAMPUS PARKING AVAILABILITY SYSTEM
+**Evaluation Milestone:** ${reviewStage}  
+**Student Name:** ${studentName}  
+**Student ID / Reg No:** ${studentId}  
+**Email:** ${studentEmail}  
+**Course & Department:** ${courseName}  
+**GitHub Repository:** [${repoUrl}](${repoUrl})  
+**Live Interactive Applet:** [https://ais-pre-4f6iknn2mdzfsrdis7sqqg-617239220030.asia-southeast1.run.app](https://ais-pre-4f6iknn2mdzfsrdis7sqqg-617239220030.asia-southeast1.run.app)  
+**Date of Submission:** ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+
+---
+
+## 1. Executive Summary & Project Abstract
+The **ParkCampus Real-Time Parking Availability System** solves campus lot congestion and gate queuing by streaming authoritative stall-level and zone-level occupancy telemetry to approaching motorists and facilities administrators. Combining physical IoT edge devices (ESP32 microcontrollers with HC-SR04 ultrasonic sensors) and computer vision cameras (Raspberry Pi running YOLO/OpenCV contour detection) with an authoritative high-throughput Node.js backend and real-time WebSockets/SSE pipelines, the system eliminates manual spot hunting, lowers vehicle idling emissions, and enforces ADA/EV stall compliance.
+
+---
+
+## 2. Review 1 Evaluation Feedback & Review 2 Remediation
+In the **Review 1 Report (35% completion)**, the evaluation committee provided specific commendations and areas for technical improvement:
+
+| Review 1 Evaluation Point | Committee Feedback | Phase 2 / Review 2 Resolution & Status |
+| :--- | :--- | :--- |
+| **Functional Components** | Commended clear scope and deliverable definition. | Maintained 100% of functional requirements across all 4 views. |
+| **Repository Structure** | Noted established public repository with foundational structure. | Organized full-stack structure: \`/src\`, \`/server\`, \`/test\`, \`README.md\`. |
+| **Unit Testing Documentation** | *"Provide more granular technical documentation on unit testing."* | **Resolved:** Built automated test suite with **49 assertions** covering in-memory store math, API endpoints, and hooks (\`npm test\`). |
+| **Error Boundaries** | *"Provide more granular technical documentation on error boundaries."* | **Resolved:** Implemented React 19 class-based \`ErrorBoundary\` with section isolation and runtime fault injection sandbox. |
+| **API & Schema Docs** | *"Expand code comments and document API endpoints / database schema in README."* | **Resolved:** Added OpenAPI-grade documentation for 8 endpoints and production-grade PostgreSQL normalized DDL schema. |
+
+---
+
+## 3. System Architecture & Ingestion Flow
+The architecture is designed as a resilient, decoupled 3-tier pipeline:
+
+\`\`\`
+[ ESP32 + Ultrasonic Sensors ] ──(HTTP POST /api/update)──┐
+                                                           │
+[ Raspberry Pi + YOLO Camera ] ──(HTTP POST /api/update)──┼──> [ Node.js/Express Server ]
+                                                           │     ├── Authoritative In-Memory Store
+[ Built-in Hardware Simulator] ──(Internal Dispatch)───────┘     ├── Relational DB Migration Target
+                                                                 └── Live Multiplexer (WS & SSE)
+                                                                           │
+                                 ┌─────────────────────────────────────────┴────────────────────────┐
+                                 ▼                                                                  ▼
+                   [ Entrance Display Kiosk ]                                         [ Responsive Driver Web App ]
+                   • Ultra-high contrast cards                                        • Interactive stall map (112 spots)
+                   • Color-coded zone occupancy                                       • Live spot reserve / toggle
+                   • Directional campus arrows                                        • Sound chime alert subscriptions
+\`\`\`
+
+---
+
+## 4. Deliverables Completion Matrix (Target: 65%+, Achieved: 75%+)
+| Component | Requirement | Implemented Details | Status |
+| :--- | :--- | :--- | :---: |
+| **Occupancy Detection** | Sensors, Camera, or Simulation | Dual physical IoT drivers (ESP32 C++ & YOLO Python) + In-memory stochastic traffic simulator with burst mode. | **Complete** |
+| **Backend REST API** | State store & REST endpoints | Express API with \`GET /api/zones\`, \`GET /api/zones/:id/availability\`, \`POST /api/update\`, \`POST /api/simulator/step\`. | **Complete** |
+| **Real-Time Push** | WebSockets / SSE | Multiplexed WebSocket server (\`ws://host/ws\`) + Server-Sent Events (\`/api/stream\`) + automatic reconnection. | **Complete** |
+| **Entrance Display** | Kiosk dashboard | Full-screen roadside display with high-contrast zone badges, directional arrows, and occupancy bars. | **Complete** |
+| **Driver Web App** | Mobile/Desktop stall map | Interactive SVG campus map with 112 individual stalls, zone filters, and stall detail modal. | **Complete** |
+| **Alert Subscriptions** | Proactive notifications | Real-time browser notification engine with Web Audio chime triggered when target zone frees up. | **Complete** |
+| **Historical Analytics** | Peak-hour logging & charts | Hourly occupancy distribution, peak-fill time curves, and predictive notes (e.g. "Zone B fills by 9:15 AM"). | **Complete** |
+| **Admin Facilities Lock** | PIN-protected controls | Security PIN modal protecting facilities-level simulator toggles and baseline resets. | **Complete** |
+
+---
+
+## 5. Unit Testing & Verification Suite
+The codebase includes an automated test runner executing **49 assertions** across 3 modules (\`npm test\`):
+1. **\`test/parkingStore.test.ts\` (29 Assertions Passed)**:
+   - Validates initial distribution across 4 campus zones (112 total spots).
+   - Validates mathematical calculations for \`occupiedSpots\`, \`freeSpots\`, and \`occupancyPercentage\`.
+   - Validates occupancy threshold transitions (\`plenty\` > 35%, \`filling\` 12–35%, \`full\` <= 12%).
+   - Tests telemetry log ring-buffer cap (50 entries) and duplicate spot ID rejection.
+   - Tests event subscriber notification and clean listener unsubscription.
+2. **\`test/apiEndpoints.test.ts\` (11 Assertions Passed)**:
+   - Tests HTTP route registration, schema validation, and status code correctness.
+   - Rejects malformed JSON bodies missing \`spotId\` or \`status\` (400 Bad Request).
+   - Rejects invalid status strings outside allowed enum values.
+   - Validates simulator interval safety limits (>= 500ms) and probability bounds (0.0 to 1.0).
+   - Validates route parameter normalization and 404 handling.
+3. **\`test/errorBoundary.test.ts\` (9 Assertions Passed)**:
+   - Validates React 19 class Error Boundary state transitions (\`hasError: false\` -> \`hasError: true\`).
+   - Verifies error message extraction, stack trace capture, and component recovery resets.
+   - Proves section isolation: internal crash in Analytics preserves Map and Entrance Board uptime.
+
+---
+
+## 6. Error Boundaries & Fault Tolerance
+To ensure high availability in production and high-traffic campus environments:
+- **Class-Based Error Boundary (\`src/components/ErrorBoundary.tsx\`)**:
+  - Implements React 19 \`componentDidCatch\` and \`getDerivedStateFromError\` hooks.
+  - Automatically isolates runtime exceptions inside sub-views (\`CampusLotMap\`, \`AnalyticsView\`, \`EntranceBoard\`).
+  - Fallback UI provides a recovery button to clear broken component state without reloading the application.
+- **In-App Fault Injection Sandbox**:
+  - Reviewers can click "Trigger Test Fault" in the documentation to verify error containment in real time.
+
+---
+
+## 7. Database Architecture & Relational DDL
+The system maintains an in-memory authoritative engine for sub-millisecond telemetry routing, accompanied by a production-ready PostgreSQL DDL schema:
+- **\`zones\` table**: Primary key \`id\`, zone name, total capacity, geographic coordinates, and directional guidance.
+- **\`parking_spots\` table**: Stall identifier, foreign key to zone, stall type (\`standard\`, \`ev\`, \`accessible\`, \`faculty\`), current status, and battery percentage.
+- **\`sensor_telemetry_logs\` table**: Audit trail with timestamp, source (\`sensor\`, \`camera\`, \`simulator\`), and occupancy state.
+- **\`historical_occupancy_snapshots\` table**: Time-series rollups used for peak-hour analytics and predictive capacity alerts.
+
+---
+
+## 8. Hardware & IoT Wiring Specification
+- **Microcontroller**: ESP32 DevKit V1 (Wi-Fi 802.11 b/g/n, 2.4 GHz).
+- **Sensor**: HC-SR04 Ultrasonic Distance Sensor (Trigger -> GPIO 5, Echo -> GPIO 18).
+- **Transmission**: JSON payload transmitted over HTTP POST every 3 seconds upon distance transition (< 150 cm = Occupied).
+- **Edge Vision Alternative**: Raspberry Pi 4 Model B running OpenCV contour centroid detection or YOLOv8-nano counting bounding boxes over camera feed.
+
+---
+
+## 9. GitHub Repository Submission & Verification Commands
+- **Repository URL:** ${repoUrl}
+- **Clone and Run Locally:**
+\`\`\`bash
+git clone ${repoUrl}.git
+cd realtime-parking-availability-system
+npm install
+npm test           # Runs all 49 automated unit tests
+npm run dev        # Starts full-stack server on http://localhost:3000
+\`\`\`
+
+---
+
+## 10. Phase 3 (100% Final Review) Roadmap
+- [ ] Physical 3D-printed weather-proof sensor enclosure deployment.
+- [ ] Integration of Automatic License Plate Recognition (ALPR) for automated permit validation.
+- [ ] Native Web Push / SMS notification service via Twilio / Firebase Cloud Messaging.
+- [ ] PostgreSQL persistent database integration with connection pooling.
+`;
+  };
+
+  const handleCopyReport = () => {
+    const reportText = generateMarkdownReport();
+    navigator.clipboard?.writeText(reportText);
+    setCopiedReportSuccess(true);
+    setTimeout(() => setCopiedReportSuccess(false), 2500);
+  };
+
+  const handleDownloadReport = () => {
+    const reportText = generateMarkdownReport();
+    const blob = new Blob([reportText], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Student_Phase_Report_Parking_System_${studentId || 'submission'}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const testEndpoint = async (url: string, method = 'GET', body?: any) => {
@@ -93,6 +266,21 @@ export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose })
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 px-6 border-b border-slate-200 bg-white overflow-x-auto shrink-0">
+          <button
+            onClick={() => setActiveTab('report')}
+            className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 transition-all shrink-0 ${
+              activeTab === 'report'
+                ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <GraduationCap className="w-4 h-4 text-emerald-600" />
+            <span className="font-bold">Student Phase Report &amp; Repo</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              Submit
+            </span>
+          </button>
+
           <button
             onClick={() => setActiveTab('api')}
             className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 transition-all shrink-0 ${
@@ -156,6 +344,345 @@ export const TechDocsModal: React.FC<TechDocsModalProps> = ({ isOpen, onClose })
 
         {/* Tab Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
+          {/* TAB: Student Phase Report */}
+          {activeTab === 'report' && (
+            <div className="space-y-6">
+              {/* Submission Action Bar */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      Phase 2 Review Report
+                    </span>
+                    <span className="text-xs font-semibold text-slate-500">Milestone: 70%+ Project Completion</span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mt-1">
+                    Student Phase Report &amp; Repository Submission
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Ready-to-submit report addressing Review 1 feedback, 49 unit assertions, error boundaries, schema, and API.
+                  </p>
+                </div>
+
+                <div className="flex items-center flex-wrap gap-2">
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
+                    <button
+                      onClick={() => setReportViewMode('formatted')}
+                      className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                        reportViewMode === 'formatted' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Formatted View
+                    </button>
+                    <button
+                      onClick={() => setReportViewMode('raw')}
+                      className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                        reportViewMode === 'raw' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      Markdown (Raw)
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={handleCopyReport}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-xs transition-all ${
+                      copiedReportSuccess
+                        ? 'bg-emerald-600 text-white shadow-emerald-200'
+                        : 'bg-slate-900 text-white hover:bg-slate-800'
+                    }`}
+                  >
+                    {copiedReportSuccess ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedReportSuccess ? 'Copied Full Report!' : 'Copy Report (.md)'}</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadReport}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 shadow-xs transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download (.md)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Editable Student Metadata Header */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                    Submission Metadata (Customizable for your University Portal)
+                  </h4>
+                  <span className="text-[11px] text-slate-400">Edit fields below to dynamically update the export</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Student / Author Name</label>
+                    <input
+                      type="text"
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. Rojjith K"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Student / Roll ID</label>
+                    <input
+                      type="text"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. CS-2026-IOT-8812"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Student Email</label>
+                    <input
+                      type="email"
+                      value={studentEmail}
+                      onChange={(e) => setStudentEmail(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. krojjith@gmail.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Course / Dept</label>
+                    <input
+                      type="text"
+                      value={courseName}
+                      onChange={(e) => setCourseName(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. CS 492 / Capstone Design"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">Evaluation Milestone</label>
+                    <input
+                      type="text"
+                      value={reviewStage}
+                      onChange={(e) => setReviewStage(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. Phase 2 / Review 2 (70% Completion)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">GitHub Repository URL</label>
+                    <input
+                      type="text"
+                      value={repoUrl}
+                      onChange={(e) => setRepoUrl(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-emerald-500 bg-slate-50/50 font-mono"
+                      placeholder="https://github.com/user/repo"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* View Content: Raw Markdown vs Formatted Visual */}
+              {reportViewMode === 'raw' ? (
+                <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 text-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono text-emerald-400">Raw Markdown Report Content</span>
+                    <button
+                      onClick={handleCopyReport}
+                      className="text-xs px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center gap-1.5"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>{copiedReportSuccess ? 'Copied!' : 'Copy All'}</span>
+                    </button>
+                  </div>
+                  <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    {generateMarkdownReport()}
+                  </pre>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* GitHub Submission Quick Card */}
+                  <div className="bg-linear-to-r from-slate-900 via-slate-800 to-indigo-950 p-6 rounded-2xl text-white shadow-lg space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400">
+                          <GitBranch className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white">GitHub Repository Submission Link</h4>
+                          <a
+                            href={repoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-emerald-400 hover:underline flex items-center gap-1 font-mono mt-0.5"
+                          >
+                            <span>{repoUrl}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyToClipboard(`git clone ${repoUrl}.git\ncd realtime-parking-availability-system\nnpm install\nnpm test\nnpm run dev`, 999)}
+                          className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-white flex items-center gap-1.5 transition-colors"
+                        >
+                          {copiedIndex === 999 ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedIndex === 999 ? 'Copied CLI Commands!' : 'Copy Clone & Test Commands'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-white/10 text-xs">
+                      <div className="bg-white/5 p-3 rounded-xl">
+                        <span className="text-slate-400 block text-[11px]">Automated Unit Tests</span>
+                        <span className="text-emerald-400 font-bold text-sm">49 Assertions Passing</span>
+                      </div>
+                      <div className="bg-white/5 p-3 rounded-xl">
+                        <span className="text-slate-400 block text-[11px]">Real-Time Streaming</span>
+                        <span className="text-sky-300 font-bold text-sm">WebSocket + SSE Ingestion</span>
+                      </div>
+                      <div className="bg-white/5 p-3 rounded-xl">
+                        <span className="text-slate-400 block text-[11px]">Fault Tolerance</span>
+                        <span className="text-amber-300 font-bold text-sm">React 19 Error Boundary</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Review 1 Feedback vs Review 2 Resolution Table */}
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Review 1 Feedback Remediation Matrix (35% &rarr; 70% Progress)
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                          <tr>
+                            <th className="py-2.5 px-3">Evaluation Point</th>
+                            <th className="py-2.5 px-3">Review 1 Feedback</th>
+                            <th className="py-2.5 px-3">Phase 2 Implemented Resolution</th>
+                            <th className="py-2.5 px-3">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-600">
+                          <tr>
+                            <td className="py-2.5 px-3 font-semibold text-slate-800">Unit Testing Documentation</td>
+                            <td className="py-2.5 px-3 italic text-slate-500">"Provide more granular technical documentation on unit testing."</td>
+                            <td className="py-2.5 px-3">
+                              Engineered 49 automated test assertions across store math, API routes, and React hooks with <code className="text-slate-800 bg-slate-100 px-1 py-0.5 rounded">npm test</code>.
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                100% Resolved
+                              </span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="py-2.5 px-3 font-semibold text-slate-800">Error Boundaries</td>
+                            <td className="py-2.5 px-3 italic text-slate-500">"Provide more granular technical documentation on error boundaries."</td>
+                            <td className="py-2.5 px-3">
+                              Implemented class-based React 19 ErrorBoundary with SectionErrorBoundary wrapping all sub-views and live runtime fault injection tester.
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                100% Resolved
+                              </span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="py-2.5 px-3 font-semibold text-slate-800">API &amp; Schema Documentation</td>
+                            <td className="py-2.5 px-3 italic text-slate-500">"Expand code comments and document API endpoints / database schema in README."</td>
+                            <td className="py-2.5 px-3">
+                              Added comprehensive JSDoc annotations across server/client, full OpenAPI-style specs for 8 endpoints, and production PostgreSQL DDL.
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                100% Resolved
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Deliverables Checklist */}
+                  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-emerald-600" />
+                      Core Deliverables &amp; Functional Scope Completion
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Dual Hardware &amp; Simulator Ingestion</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            ESP32 microcontroller ultrasonic code, Raspberry Pi OpenCV camera script, plus in-app traffic simulator.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Real-Time WebSocket &amp; SSE Push</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            Instant zero-polling synchronization of stall changes to entrance display kiosks and driver maps.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Roadside Entrance Display Board</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            Full-screen high-contrast signage with color-coded density cards (green/yellow/red) and campus directional guidance.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Mobile-Friendly Interactive Stall Map</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            112 parking stalls across 4 zones with EV, ADA, and faculty designations, spot reservation, and status toggles.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Spot Availability Alert Engine</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            "Notify me when Zone B has a spot" with audio chime synthesis and in-browser toast alert.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-slate-800">Peak-Hour Historical Analytics &amp; PIN Security</span>
+                          <p className="text-slate-500 text-[11px] mt-0.5">
+                            Predictive fill notes ("Zone B fills by 9:15 AM"), hourly histograms, and PIN protection for facilities controls.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* TAB: API Endpoints */}
           {activeTab === 'api' && (
             <div className="space-y-6">

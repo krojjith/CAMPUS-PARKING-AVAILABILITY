@@ -23,6 +23,7 @@ import {
   WifiOff,
   BookOpen,
   FileCode,
+  GraduationCap,
 } from 'lucide-react';
 import { SimulatorConfig } from '../types';
 
@@ -41,8 +42,8 @@ interface HeaderProps {
   onOpenAlerts: () => void;
   /** Toggles simulator on/off */
   onToggleSimulator: () => void;
-  /** Opens technical documentation and review modal */
-  onOpenDocs: () => void;
+  /** Opens technical documentation and review modal with optional tab */
+  onOpenDocs: (tab?: 'report' | 'api' | 'schema' | 'testing' | 'boundaries' | 'hardware') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -134,14 +135,26 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Controls */}
           <div className="flex items-center gap-2">
+            {/* Student Phase Report & Repo Button */}
+            <button
+              id="header-student-report-button"
+              onClick={() => onOpenDocs('report')}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 shadow-xs transition-colors"
+              title="Open Student Phase Report, Submission Details & GitHub Repo"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Phase Report &amp; Repo</span>
+              <span className="sm:hidden">Report</span>
+            </button>
+
             {/* Tech Docs & Review 2 Spec Modal Button */}
             <button
               id="header-tech-docs-button"
-              onClick={onOpenDocs}
+              onClick={() => onOpenDocs('api')}
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 shadow-xs transition-colors"
               title="Open Technical Documentation, API Reference, Schema & Testing Spec"
             >
-              <FileCode className="w-3.5 h-3.5 text-emerald-600" />
+              <FileCode className="w-3.5 h-3.5 text-slate-600" />
               <span className="hidden xl:inline">Tech Docs &amp; Review 2</span>
               <span className="xl:hidden">Docs</span>
             </button>

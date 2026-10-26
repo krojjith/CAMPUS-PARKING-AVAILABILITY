@@ -122,7 +122,9 @@ async function startServer() {
   /**
    * GET /api/zones
    * @description Returns live availability metrics across all campus parking zones.
-   * Used by the Entrance Display Board and Student Mobile App for high-level availability.
+   * Consumed by the Roadside Entrance Display Board kiosk and the Student Mobile App.
+   * @route GET /api/zones
+   * @returns 200 OK with array of ZoneAvailability and server ISO timestamp
    */
   app.get('/api/zones', (_req: Request, res: Response) => {
     const zones = parkingStore.getAllZones();
@@ -130,15 +132,39 @@ async function startServer() {
   });
 
   /**
+   * GET /api/zones/:id
+   * @description Returns summary metrics and capacity breakdown for a specific zone.
+   * Normalizes case and trims whitespace from the input parameter.
+   * @route GET /api/zones/:id
+   * @param id Zone identifier string (e.g., 'zone-a', 'zone-b', 'zone-c', 'zone-d')
+   * @returns 200 OK with ZoneAvailability object
+   * @returns 404 Not Found if zone ID does not match any zone on campus
+   */
+  app.get('/api/zones/:id', (req: Request, res: Response) => {
+    const rawId = req.params.id || '';
+    const zoneId = rawId.toLowerCase().trim();
+    const summary = parkingStore.calculateZoneSummary(zoneId);
+    if (!summary) {
+      return res.status(404).json({ error: `Zone with ID '${rawId}' not found.` });
+    }
+    res.json(summary);
+  });
+
+  /**
    * GET /api/zones/:id/availability
    * @description Returns detailed availability metrics along with the complete spot array for a zone.
+   * Ideal for rendering localized lot layout diagrams and stall grids.
+   * @route GET /api/zones/:id/availability
    * @param id The zone identifier (e.g. 'zone-a', 'zone-b')
+   * @returns 200 OK with ParkingZoneDetail object containing `spots: ParkingSpot[]`
+   * @returns 404 Not Found if zone ID is unknown
    */
   app.get('/api/zones/:id/availability', (req: Request, res: Response) => {
-    const zoneId = req.params.id;
+    const rawId = req.params.id || '';
+    const zoneId = rawId.toLowerCase().trim();
     const detail = parkingStore.getZoneDetail(zoneId);
     if (!detail) {
-      return res.status(404).json({ error: `Zone with ID '${zoneId}' not found.` });
+      return res.status(404).json({ error: `Zone with ID '${rawId}' not found.` });
     }
     res.json(detail);
   });
@@ -146,9 +172,19 @@ async function startServer() {
   /**
    * GET /api/spots
    * @description Returns the complete list of all 112 parking spots campus-wide.
+   * Supports optional query filtering by zone via `?zone=zone-a`.
+   * @route GET /api/spots
+   * @query zone Optional zoneId to filter results
+   * @returns 200 OK with array of ParkingSpot objects
    */
-  app.get('/api/spots', (_req: Request, res: Response) => {
-    res.json({ spots: parkingStore.getAllSpots() });
+  app.get('/api/spots', (req: Request, res: Response) => {
+    const zoneQuery = req.query.zone as string | undefined;
+    let allSpots = parkingStore.getAllSpots();
+    if (zoneQuery) {
+      const normalizedZone = zoneQuery.toLowerCase().trim();
+      allSpots = allSpots.filter((s) => s.zoneId === normalizedZone);
+    }
+    res.json({ spots: allSpots });
   });
 
   /**
